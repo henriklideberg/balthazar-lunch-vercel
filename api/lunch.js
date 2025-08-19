@@ -16,9 +16,11 @@ export default async function handler(req, res) {
     let vegetarisk = '';
     let fisk = '';
 
+    // Flexibel sökning: matcha veckodag i början eller mitten av text
     sections.forEach(section => {
-      const text = section.textContent.toLowerCase();
-      if (text.includes(today)) {
+      const text = section.textContent.toLowerCase().trim();
+
+      if (text.startsWith(today) || text.includes(today)) {
         dagens = section.textContent.trim();
       }
       if (text.includes('veckans vegetariska')) {
@@ -41,4 +43,9 @@ export default async function handler(req, res) {
     `;
 
     res.setHeader('Content-Type', 'text/html');
-   
+    res.status(200).send(htmlOutput);
+  } catch (error) {
+    console.error('Fel vid hämtning:', error);
+    res.status(500).send('Kunde inte hämta lunchmenyn.');
+  }
+}
