@@ -9,30 +9,33 @@ export default async function handler(req, res) {
     const dom = new JSDOM(html);
     const document = dom.window.document;
 
-    const today = new Date().toLocaleDateString('sv-SE', { weekday: 'long' }).toLowerCase();
+    const targetDiv = document.querySelector("div.elementor-element.elementor-element-80a5835.e-con-full.e-flex.e-con.e-child");
 
     let dagens = '';
     let vegetarisk = '';
     let fisk = '';
 
-    const elements = [...document.querySelectorAll('p, div, span')];
+    if (targetDiv) {
+      const textBlocks = [...targetDiv.querySelectorAll('p, div, span')];
+      const today = new Date().toLocaleDateString('sv-SE', { weekday: 'long' }).toLowerCase();
 
-    elements.forEach(el => {
-      const text = el.textContent.toLowerCase().trim();
-      if (text.includes(today) && !dagens) {
-        dagens = el.textContent.trim();
-      }
-      if (text.includes('veckans vegetariska') && !vegetarisk) {
-        vegetarisk = el.textContent.trim();
-      }
-      if (text.includes('veckans fisk') && !fisk) {
-        fisk = el.textContent.trim();
-      }
-    });
+      textBlocks.forEach(el => {
+        const text = el.textContent.toLowerCase().trim();
+        if (text.includes(today) && !dagens) {
+          dagens = el.textContent.trim();
+        }
+        if (text.includes('veckans vegetariska') && !vegetarisk) {
+          vegetarisk = el.textContent.trim();
+        }
+        if (text.includes('veckans fisk') && !fisk) {
+          fisk = el.textContent.trim();
+        }
+      });
+    }
 
     const htmlOutput = `
       <div style="font-family: Arial; padding: 10px;">
-        <h2>Dagens Lunch (${today.charAt(0).toUpperCase() + today.slice(1)})</h2>
+        <h2>Dagens Lunch (${new Date().toLocaleDateString('sv-SE', { weekday: 'long' })})</h2>
         <p>${dagens || 'Ingen dagens lunch hittades.'}</p>
         <h3>Veckans Vegetariska</h3>
         <p>${vegetarisk || 'Ingen vegetarisk rätt hittades.'}</p>
