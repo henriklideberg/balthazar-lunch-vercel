@@ -2,32 +2,31 @@ import fetch from 'node-fetch';
 import { JSDOM } from 'jsdom';
 
 export default async function handler(req, res) {
-  const url = 'https://balthazar.se/veckans-lunch/';
+  const url = 'https://balthazar.se/lunch';
   try {
     const response = await fetch(url);
     const html = await response.text();
     const dom = new JSDOM(html);
     const document = dom.window.document;
 
-    const sections = [...document.querySelectorAll('.elementor-widget-container')];
     const today = new Date().toLocaleDateString('sv-SE', { weekday: 'long' }).toLowerCase();
 
     let dagens = '';
     let vegetarisk = '';
     let fisk = '';
 
-    // Flexibel sökning: matcha veckodag i början eller mitten av text
-    sections.forEach(section => {
-      const text = section.textContent.toLowerCase().trim();
+    const elements = [...document.querySelectorAll('p, div, span')];
 
-      if (text.startsWith(today) || text.includes(today)) {
-        dagens = section.textContent.trim();
+    elements.forEach(el => {
+      const text = el.textContent.toLowerCase().trim();
+      if (text.includes(today) && !dagens) {
+        dagens = el.textContent.trim();
       }
-      if (text.includes('veckans vegetariska')) {
-        vegetarisk = section.textContent.trim();
+      if (text.includes('veckans vegetariska') && !vegetarisk) {
+        vegetarisk = el.textContent.trim();
       }
-      if (text.includes('veckans fisk')) {
-        fisk = section.textContent.trim();
+      if (text.includes('veckans fisk') && !fisk) {
+        fisk = el.textContent.trim();
       }
     });
 
