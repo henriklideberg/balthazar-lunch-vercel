@@ -1,0 +1,42 @@
+import fetch from 'node-fetch';
+import { JSDOM } from 'jsdom';
+
+export default async function handler(req, res) {
+  const url = 'https://balthazar.se/veckans-lunch/';
+  try {
+    const response = await fetch(url);
+    const html = await response.text();
+    const dom = new JSDOM(html);
+    const document = dom.window.document;
+
+    const sections = [...document.querySelectorAll('.elementor-widget-container')];
+    const today = new Date().toLocaleDateString('sv-SE', { weekday: 'long' }).toLowerCase();
+
+    let dagens = '';
+    let vegetarisk = '';
+    let fisk = '';
+
+    sections.forEach(section => {
+      const text = section.textContent.toLowerCase();
+      if (text.includes(today)) dagens = section.textContent.trim();
+      if (text.includes('veckans vegetariska')) vegetarisk = section.textContent.trim();
+      if (text.includes('veckans fisk')) fisk = section.textContent.trim();
+    });
+
+    const htmlOutput = `
+      <div style="font-family: Arial; padding: 10px;">
+        <h2>Dagens Lunch (${today.charAt(0).toUpperCase() + today.slice(1)})</h2>
+        <p>${dagens}</p>
+        <h3>Veckans Vegetariska</h3>
+        <p>${vegetarisk}</p>
+        <h3>Veckans Fisk</h3>
+        <p>${fisk}</p>
+      </div>
+    `;
+
+    res.setHeader('Content-Type', 'text/html');
+    res.status(200).send(htmlOutput);
+  } catch (error) {
+    res.status(500).json({ error: 'Kunde inte hämta lunchmenyn.' });
+  }
+}
