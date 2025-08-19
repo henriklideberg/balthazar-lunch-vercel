@@ -16,10 +16,10 @@ export default async function handler(req, res) {
     let fisk = '';
 
     if (targetDiv) {
-      const textBlocks = [...targetDiv.querySelectorAll('p, div, span')];
       const today = new Date().toLocaleDateString('sv-SE', { weekday: 'long' }).toLowerCase();
+      const blocks = [...targetDiv.querySelectorAll('p, span, div')];
 
-      textBlocks.forEach(el => {
+      blocks.forEach(el => {
         const text = el.textContent.toLowerCase().trim();
         if (text.includes(today) && !dagens) {
           dagens = el.textContent.trim();
